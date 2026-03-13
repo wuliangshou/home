@@ -187,9 +187,6 @@
             transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             max-width: 90%;
         }
-        .congrats-overlay.show .congrats-card {
-            transform: scale(1) translateY(0);
-        }
         .congrats-text {
             font-size: 3.2rem;
             font-weight: bold;
@@ -253,7 +250,7 @@
             </div>
         </div>
         
-        <!-- 底部工具栏：自动念经 + 速度调节 + 字体 + 静音 (已移除文件导入/重置/历史) -->
+        <!-- 底部工具栏：自动念经 + 速度调节 + 字体 + 新增的音频播放按钮 + 静音 + 木鱼 -->
         <div class="reading-tools">
             <div class="left-tools">
                 <!-- 自动念经开关 -->
@@ -268,6 +265,10 @@
                 </div>
                 <button class="tool-btn" id="fontDown"><i class="fas fa-search-minus"></i> 缩小</button>
                 <button class="tool-btn" id="fontUp"><i class="fas fa-search-plus"></i> 放大</button>
+                <!-- 新增的音频播放按钮 (在静音左侧) -->
+                <button class="tool-btn" id="audioPlayerBtn">
+                    <i class="fas fa-headphones"></i>四字佛号
+                </button>
             </div>
             <div class="right-tools">
                 <button class="mute-btn" id="muteBtn">
@@ -507,6 +508,11 @@
         XIAOCHU: 'https://amitofoicu.github.io/home/xiaochu.mp3'
     };
 
+    // 新增：音频播放器状态
+    const AUDIO_URL = 'https://cf.sanshi.uk/media/mp3/61/61-175/61-175-0001.mp3';
+    let audioPlayer = null;  // 延迟初始化，避免自动播放策略
+    let isAudioPlaying = false;
+
     // 状态
     let currentTitle = DEFAULT_TITLE;
     let currentText = DEFAULT_TEXT;
@@ -547,6 +553,8 @@
     const autoBtn = document.getElementById('autoBtn');
     const speedSlider = document.getElementById('speedSlider');
     const speedValue = document.getElementById('speedValue');
+    // 新增音频播放按钮
+    const audioPlayerBtn = document.getElementById('audioPlayerBtn');
 
     // ---------- 预加载所有音效 ----------
     async function preloadAllSounds() {
@@ -936,6 +944,45 @@
         }
     }
 
+    // ---------- 新增：音频播放器控制 ----------
+    function toggleAudioPlayer() {
+        if (!audioPlayer) {
+            // 首次点击，初始化 Audio 对象并尝试播放
+            audioPlayer = new Audio(AUDIO_URL);
+            audioPlayer.loop = false; // 不循环，可自行决定
+            audioPlayer.preload = 'metadata';
+            
+            // 监听播放结束，重置按钮状态
+            audioPlayer.addEventListener('ended', () => {
+                isAudioPlaying = false;
+                audioPlayerBtn.innerHTML = '<i class="fas fa-headphones"></i> 听经';
+            });
+            
+            // 监听错误，重置
+            audioPlayer.addEventListener('error', () => {
+                isAudioPlaying = false;
+                audioPlayerBtn.innerHTML = '<i class="fas fa-headphones"></i> 听经';
+                alert('音频加载失败，请检查网络或稍后重试。');
+            });
+        }
+        
+        if (isAudioPlaying) {
+            // 当前播放中 -> 暂停
+            audioPlayer.pause();
+            isAudioPlaying = false;
+            audioPlayerBtn.innerHTML = '<i class="fas fa-headphones"></i> 听经';
+        } else {
+            // 当前暂停或停止 -> 播放
+            // 由于浏览器自动播放策略，需要用户手势触发，这里正好是点击事件，安全
+            audioPlayer.play().catch(e => {
+                console.warn('音频播放失败:', e);
+                alert('无法自动播放，请手动点击播放。');
+            });
+            isAudioPlaying = true;
+            audioPlayerBtn.innerHTML = '<i class="fas fa-pause-circle"></i> 暂停听经';
+        }
+    }
+
     // ---------- 事件绑定 ----------
     sutraText.addEventListener('click', nextChar);
 
@@ -968,7 +1015,8 @@
     // 速度滑块
     speedSlider.addEventListener('input', updateSpeed);
 
-    // 重置按钮已移除，但保留resetIndex函数供内部使用
+    // 新增音频播放按钮事件
+    audioPlayerBtn.addEventListener('click', toggleAudioPlayer);
 
     // ---------- 初始化 ----------
     window.addEventListener('load', () => {
@@ -978,7 +1026,7 @@
         speedValue.textContent = autoSpeed.toFixed(1) + 's';
     });
 
-    // 点击页面激活音频上下文
+    // 点击页面激活音频上下文（用于木鱼）
     document.addEventListener('click', function initAudio() {
         if (audioContext && audioContext.state === 'suspended') {
             audioContext.resume();
