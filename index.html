@@ -267,7 +267,7 @@
                 <button class="tool-btn" id="fontUp"><i class="fas fa-search-plus"></i> 放大</button>
                 <!-- 新增的音频播放按钮 (在静音左侧) -->
                 <button class="tool-btn" id="audioPlayerBtn">
-                    <i class="fas fa-headphones"></i>四字佛号
+                    <i class="fas fa-headphones"></i>念佛
                 </button>
             </div>
             <div class="right-tools">
@@ -955,13 +955,13 @@
             // 监听播放结束，重置按钮状态
             audioPlayer.addEventListener('ended', () => {
                 isAudioPlaying = false;
-                audioPlayerBtn.innerHTML = '<i class="fas fa-headphones"></i> 听经';
+                audioPlayerBtn.innerHTML = '<i class="fas fa-headphones"></i>念佛';
             });
             
             // 监听错误，重置
             audioPlayer.addEventListener('error', () => {
                 isAudioPlaying = false;
-                audioPlayerBtn.innerHTML = '<i class="fas fa-headphones"></i> 听经';
+                audioPlayerBtn.innerHTML = '<i class="fas fa-headphones"></i>念佛';
                 alert('音频加载失败，请检查网络或稍后重试。');
             });
         }
@@ -970,7 +970,7 @@
             // 当前播放中 -> 暂停
             audioPlayer.pause();
             isAudioPlaying = false;
-            audioPlayerBtn.innerHTML = '<i class="fas fa-headphones"></i> 听经';
+            audioPlayerBtn.innerHTML = '<i class="fas fa-headphones"></i>念佛';
         } else {
             // 当前暂停或停止 -> 播放
             // 由于浏览器自动播放策略，需要用户手势触发，这里正好是点击事件，安全
@@ -979,7 +979,7 @@
                 alert('无法自动播放，请手动点击播放。');
             });
             isAudioPlaying = true;
-            audioPlayerBtn.innerHTML = '<i class="fas fa-pause-circle"></i> 暂停听经';
+            audioPlayerBtn.innerHTML = '<i class="fas fa-pause-circle"></i>念佛';
         }
     }
 
